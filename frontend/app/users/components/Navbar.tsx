@@ -70,12 +70,7 @@ export default function Navbar() {
               </div>
             </div>
 
-            <Link href="/blogs" className="text-gray-600 hover:text-blue-600 font-medium transition-colors">
-              Blogs
-            </Link>
-            <Link href="/tutorials" className="text-gray-600 hover:text-blue-600 font-medium transition-colors">
-              Tutorials
-            </Link>
+
             <Link href="/users/clients" className="text-gray-600 hover:text-blue-600 font-medium transition-colors">
               Clients
             </Link>

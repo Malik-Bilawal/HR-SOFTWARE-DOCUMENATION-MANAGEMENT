@@ -12,6 +12,9 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 from pathlib import Path
 import os
 
+import pymysql
+pymysql.install_as_MySQLdb()
+
 # 1. Define BASE_DIR FIRST
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -44,6 +47,9 @@ INSTALLED_APPS = [
     'corsheaders',
     'modules',
     'clients',
+    'contact',
+    'home',
+    'hardware',
 ]
 
 CORS_ALLOWED_ORIGINS = [
