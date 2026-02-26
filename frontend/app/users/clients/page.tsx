@@ -13,6 +13,10 @@ import {
   Twitter,
   Linkedin,
   Facebook,
+  Building2,
+  Award,
+  TrendingUp,
+  Star,
 } from "lucide-react";
 import { PhoneIcon, EnvelopeIcon } from "@heroicons/react/24/outline";
 
@@ -35,18 +39,41 @@ export default function ClientsPage() {
   const [filteredClients, setFilteredClients] = useState<Client[]>([]);
   const [activeCategory, setActiveCategory] = useState<string>("ALL");
   const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    totalClients: 0,
+    totalCategories: 0,
+    industries: "12+",
+    trustScore: "99%",
+  });
 
   // Fetch categories on mount
   useEffect(() => {
-    AOS.init({ duration: 800, once: true });
+    AOS.init({
+      duration: 800,
+      once: false,
+      mirror: true,
+      offset: 50,
+      easing: 'ease-out-cubic'
+    });
     fetchCategories();
+    fetchAllClients();
   }, []);
+
+  // Refresh AOS after content loads
+  useEffect(() => {
+    if (!loading) {
+      setTimeout(() => {
+        AOS.refresh();
+      }, 100);
+    }
+  }, [loading, filteredClients]);
 
   const fetchCategories = async () => {
     try {
       const res = await fetch("http://localhost:8000/api/categories/");
       const data = await res.json();
       setCategories(data);
+      setStats(prev => ({ ...prev, totalCategories: data.length }));
     } catch (error) {
       console.error("Failed to fetch categories", error);
     }
@@ -59,7 +86,8 @@ export default function ClientsPage() {
       const res = await fetch("http://localhost:8000/api/clients/");
       const data = await res.json();
       setAllClients(data);
-      setFilteredClients(data); // initially show all
+      setFilteredClients(data);
+      setStats(prev => ({ ...prev, totalClients: data.length }));
     } catch (error) {
       console.error("Failed to fetch clients", error);
     } finally {
@@ -87,7 +115,7 @@ export default function ClientsPage() {
   const handleCategoryClick = (catName: string, catId?: number) => {
     setActiveCategory(catName);
     if (catName === "ALL") {
-      fetchAllClients();
+      setFilteredClients(allClients);
     } else if (catId) {
       fetchClientsByCategory(catId);
     }
@@ -101,7 +129,7 @@ export default function ClientsPage() {
 
   return (
     <main className="bg-white selection:bg-blue-100 selection:text-blue-900">
-      {/* --- HERO SECTION (unchanged) --- */}
+      {/* --- HERO SECTION WITH ENHANCED AOS --- */}
       <section className="relative pt-24 pb-20 overflow-hidden">
         <div
           className="absolute inset-0 z-0 opacity-[0.03] pointer-events-none"
@@ -113,6 +141,7 @@ export default function ClientsPage() {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div
             data-aos="fade-down"
+            data-aos-delay="100"
             className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 mb-8"
           >
             <ShieldCheck className="w-4 h-4 text-blue-600" />
@@ -123,6 +152,7 @@ export default function ClientsPage() {
 
           <h1
             data-aos="fade-up"
+            data-aos-delay="200"
             className="text-5xl md:text-8xl font-black text-slate-900 tracking-tighter mb-8"
           >
             Trusted by the <br />
@@ -133,7 +163,7 @@ export default function ClientsPage() {
 
           <div
             data-aos="fade-up"
-            data-aos-delay="200"
+            data-aos-delay="300"
             className="max-w-2xl mx-auto relative px-10 py-8 rounded-3xl bg-white border border-slate-100 shadow-xl shadow-blue-500/5 italic text-xl text-slate-600"
           >
             <span className="absolute top-2 left-6 text-7xl text-blue-100 serif select-none opacity-50">
@@ -146,17 +176,19 @@ export default function ClientsPage() {
           </div>
         </div>
 
-        {/* --- SMART STATS BAR (unchanged) --- */}
+        {/* --- ENHANCED STATS BAR WITH AOS --- */}
         <div className="max-w-5xl mx-auto mt-20 grid grid-cols-2 md:grid-cols-4 gap-4 px-4">
           {[
-            { label: "Enterprise Clients", value: "500+", icon: Users },
-            { label: "Industries", value: "12+", icon: BarChart3 },
-            { label: "Global Offices", value: "5+", icon: Globe2 },
-            { label: "Trust Score", value: "99%", icon: ShieldCheck },
+            { label: "Enterprise Clients", value: stats.totalClients + "+", icon: Users, delay: "100" },
+            { label: "Industries", value: stats.industries, icon: BarChart3, delay: "200" },
+            { label: "Global Offices", value: "5+", icon: Globe2, delay: "300" },
+            { label: "Trust Score", value: stats.trustScore, icon: ShieldCheck, delay: "400" },
           ].map((stat, i) => (
             <div
               key={i}
-              className="text-center p-6 bg-slate-50/50 rounded-2xl border border-white hover:border-blue-100 hover:bg-white transition-all duration-300"
+              data-aos="zoom-in"
+              data-aos-delay={stat.delay}
+              className="text-center p-6 bg-slate-50/50 rounded-2xl border border-white hover:border-blue-100 hover:bg-white hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
             >
               <stat.icon className="w-5 h-5 text-blue-500 mx-auto mb-3" />
               <div className="text-3xl font-black text-slate-900 tracking-tight">
@@ -170,14 +202,18 @@ export default function ClientsPage() {
         </div>
       </section>
 
-      {/* --- MARQUEE STRIP (dynamic) --- */}
+      {/* --- ENHANCED MARQUEE STRIP --- */}
       {marqueeClients.length > 0 && (
-        <div className="py-12 bg-slate-900 overflow-hidden relative border-y border-white/10">
+        <div 
+          data-aos="fade-up"
+          data-aos-delay="200"
+          className="py-12 bg-slate-900 overflow-hidden relative border-y border-white/10"
+        >
           <div className="flex animate-marquee whitespace-nowrap items-center">
-            {[...marqueeClients, ...marqueeClients].map((name, i) => (
-              <div key={i} className="flex items-center mx-10">
-                <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mr-4 shadow-[0_0_8px_rgba(59,130,246,0.5)]"></div>
-                <span className="text-lg font-bold text-white/40 hover:text-white transition-colors uppercase tracking-tighter">
+            {[...marqueeClients, ...marqueeClients, ...marqueeClients].map((name, i) => (
+              <div key={i} className="flex items-center mx-10 group">
+                <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mr-4 shadow-[0_0_8px_rgba(59,130,246,0.5)] group-hover:bg-blue-400 transition-colors"></div>
+                <span className="text-lg font-bold text-white/40 group-hover:text-white transition-all duration-300 uppercase tracking-tighter">
                   {name}
                 </span>
               </div>
@@ -186,17 +222,22 @@ export default function ClientsPage() {
         </div>
       )}
 
-      {/* --- INTERACTIVE CATEGORIES (dynamic) --- */}
-      <section className="sticky top-0 z-40 py-6 bg-white/80 backdrop-blur-md border-b border-slate-100">
+      {/* --- INTERACTIVE CATEGORIES WITH AOS --- */}
+      <section 
+        data-aos="fade-down"
+        className="sticky top-0 z-40 py-6 bg-white/80 backdrop-blur-md border-b border-slate-100"
+      >
         <div className="max-w-7xl mx-auto px-4 overflow-x-auto no-scrollbar">
           <div className="flex justify-start md:justify-center items-center gap-2 min-w-max">
-            {allCategories.map((cat) => (
+            {allCategories.map((cat, index) => (
               <button
                 key={cat.id}
+                data-aos="fade-left"
+                data-aos-delay={index * 50}
                 onClick={() => handleCategoryClick(cat.name, cat.id === 0 ? undefined : cat.id)}
-                className={`px-5 py-2 rounded-full text-xs font-bold transition-all ${
+                className={`px-5 py-2 rounded-full text-xs font-bold transition-all transform hover:scale-105 ${
                   activeCategory === cat.name
-                    ? "bg-blue-600 text-white shadow-lg shadow-blue-200"
+                    ? "bg-blue-600 text-white shadow-lg shadow-blue-200 scale-105"
                     : "bg-slate-50 text-slate-500 hover:bg-slate-100"
                 }`}
               >
@@ -207,84 +248,145 @@ export default function ClientsPage() {
         </div>
       </section>
 
-      {/* --- CLIENTS GRID (dynamic) --- */}
+      {/* --- ENHANCED CLIENTS GRID WITH AOS --- */}
       <section className="py-20 bg-slate-50/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {loading ? (
-            <div className="text-center py-20 text-slate-500">Loading clients...</div>
+            <div className="text-center py-20">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-500 border-t-transparent"></div>
+              <p className="mt-4 text-slate-500">Loading clients...</p>
+            </div>
           ) : filteredClients.length === 0 ? (
-            <div className="text-center py-20 text-slate-500">
-              No clients found in this category.
+            <div 
+              data-aos="fade-up"
+              className="text-center py-20 text-slate-500 bg-white rounded-2xl shadow-sm"
+            >
+              <Building2 className="w-16 h-16 mx-auto text-slate-300 mb-4" />
+              <p className="text-lg font-medium">No clients found in this category.</p>
+              <button 
+                onClick={() => handleCategoryClick("ALL")}
+                className="mt-4 text-blue-600 hover:text-blue-700 font-medium"
+              >
+                View all clients →
+              </button>
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {filteredClients.map((client, index) => (
-                <div
-                  key={client.id}
-                  data-aos="fade-up"
-                  data-aos-delay={index % 6 * 50}
-                  className="group relative bg-white border border-slate-200 rounded-2xl p-6 h-32 flex flex-col items-center justify-center transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/10 hover:-translate-y-1 hover:border-blue-500/50"
-                >
-                  <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
-                  </div>
-
-                  {/* Logo or placeholder */}
-                  {client.logo ? (
-                    <div className="relative w-12 h-12 mb-2">
-                      <Image
-                        src={`http://localhost:8000${client.logo}`}
-                        alt={client.name}
-                        fill
-                        className="object-contain"
-                      />
-                    </div>
-                  ) : (
-                    <div className="w-12 h-12 bg-slate-100 rounded-full mb-2 flex items-center justify-center text-slate-400 text-[8px] font-bold">
-                      No logo
-                    </div>
-                  )}
-
-                  <span className="text-slate-400 font-bold text-xs text-center group-hover:text-slate-900 transition-colors uppercase tracking-tight">
-                    {client.name}
+            <>
+              {/* Stats Row */}
+              <div 
+                data-aos="fade-up"
+                className="flex justify-between items-center mb-8 bg-white p-4 rounded-xl shadow-sm"
+              >
+                <p className="text-slate-600">
+                  Showing <span className="font-bold text-blue-600">{filteredClients.length}</span> clients
+                </p>
+                <div className="flex gap-2">
+                  <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-bold">
+                    {activeCategory}
                   </span>
-                  <div className="mt-2 text-[8px] font-bold text-blue-500 opacity-0 group-hover:opacity-100 transition-all uppercase tracking-widest">
-                    Verified Partner
-                  </div>
                 </div>
-              ))}
-            </div>
+              </div>
+
+              {/* Clients Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                {filteredClients.map((client, index) => (
+                  <div
+                    key={client.id}
+                    data-aos="fade-up"
+                    data-aos-delay={Math.min(index % 6 * 50, 300)}
+                    data-aos-anchor-placement="top-bottom"
+                    className="group relative bg-white border border-slate-200 rounded-2xl p-6 h-32 flex flex-col items-center justify-center transition-all duration-500 hover:shadow-2xl hover:shadow-blue-500/10 hover:-translate-y-2 hover:border-blue-500/50"
+                  >
+                    {/* Hover Effects */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 via-blue-500/0 to-blue-500/0 group-hover:from-blue-500/5 group-hover:via-blue-500/5 group-hover:to-blue-500/5 rounded-2xl transition-all duration-500"></div>
+                    
+                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
+                    </div>
+
+                    {/* Logo or placeholder */}
+                    {client.logo ? (
+                      <div className="relative w-12 h-12 mb-2 group-hover:scale-110 transition-transform duration-300">
+                        <Image
+                          src={`http://localhost:8000${client.logo}`}
+                          alt={client.name}
+                          fill
+                          className="object-contain"
+                        />
+                      </div>
+                    ) : (
+                      <div className="w-12 h-12 bg-gradient-to-br from-slate-100 to-slate-200 rounded-full mb-2 flex items-center justify-center text-slate-400 text-[8px] font-bold group-hover:scale-110 transition-transform">
+                        <Building2 className="w-6 h-6 text-slate-400" />
+                      </div>
+                    )}
+
+                    <span className="text-slate-400 font-bold text-xs text-center group-hover:text-slate-900 transition-colors uppercase tracking-tight">
+                      {client.name}
+                    </span>
+                    
+                    {/* Verified Badge */}
+                    <div className="mt-2 text-[8px] font-bold text-blue-500 opacity-0 group-hover:opacity-100 transition-all uppercase tracking-widest flex items-center gap-1">
+                      <Star className="w-3 h-3" />
+                      Verified Partner
+                    </div>
+
+                    {/* Category Tag (if available) */}
+                    {client.category_id && (
+                      <div className="absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span className="text-[6px] font-bold bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded-full">
+                          {categories.find(c => c.id === client.category_id)?.name || 'Partner'}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </>
           )}
         </div>
       </section>
 
-      {/* --- CALL TO ACTION (unchanged) --- */}
+      {/* --- CALL TO ACTION WITH AOS --- */}
       <section className="py-20 bg-blue-600 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-        <div className="relative z-10 max-w-4xl mx-auto text-center px-4">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 animate-pulse"></div>
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-400/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
+        
+        <div 
+          data-aos="zoom-in-up"
+          className="relative z-10 max-w-4xl mx-auto text-center px-4"
+        >
           <h2 className="text-3xl md:text-5xl font-black text-white mb-6 tracking-tight">
-            Ready to streamline your HR?
+            Ready to join our <span className="text-yellow-300">success story?</span>
           </h2>
-          <p className="text-blue-100 text-lg mb-10">
-            Join the hundreds of companies that have already transformed their people
-            operations.
+          <p className="text-blue-100 text-lg mb-10 max-w-2xl mx-auto">
+            Join the {stats.totalClients}+ companies that have already transformed their people
+            operations with FlowHCM.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="bg-white text-blue-600 px-10 py-4 rounded-xl font-bold hover:bg-blue-50 transition-colors shadow-xl">
+            <button 
+              data-aos="fade-right"
+              className="bg-white text-blue-600 px-10 py-4 rounded-xl font-bold hover:bg-blue-50 transition-all transform hover:scale-105 shadow-xl hover:shadow-2xl"
+            >
               Book a Demo
             </button>
-            <button className="bg-blue-700 text-white border border-blue-500 px-10 py-4 rounded-xl font-bold hover:bg-blue-800 transition-colors">
+            <button 
+              data-aos="fade-left"
+              className="bg-blue-700 text-white border border-blue-500 px-10 py-4 rounded-xl font-bold hover:bg-blue-800 transition-all transform hover:scale-105"
+            >
               Contact Sales
             </button>
           </div>
         </div>
       </section>
 
-      {/* --- FOOTER (unchanged, but you can make module links dynamic later) --- */}
+      {/* --- FOOTER WITH AOS --- */}
       <footer className="bg-slate-950 text-slate-400 pt-20 pb-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 mb-16">
-            <div className="lg:col-span-4">
+            <div 
+              data-aos="fade-right"
+              className="lg:col-span-4"
+            >
               <h3 className="text-2xl font-black text-white mb-6 italic tracking-tighter uppercase">
                 Flow<span className="text-blue-500">HCM</span>
               </h3>
@@ -297,7 +399,9 @@ export default function ClientsPage() {
                   <a
                     key={i}
                     href="#"
-                    className="w-10 h-10 rounded-lg bg-slate-900 flex items-center justify-center hover:bg-blue-600 hover:text-white transition-all border border-slate-800"
+                    data-aos="fade-up"
+                    data-aos-delay={i * 100}
+                    className="w-10 h-10 rounded-lg bg-slate-900 flex items-center justify-center hover:bg-blue-600 hover:text-white transition-all border border-slate-800 hover:scale-110"
                   >
                     <Icon size={18} />
                   </a>
@@ -305,51 +409,79 @@ export default function ClientsPage() {
               </div>
             </div>
 
-            <div className="lg:col-span-2">
+            <div 
+              data-aos="fade-up"
+              data-aos-delay="100"
+              className="lg:col-span-2"
+            >
               <h4 className="font-bold text-white text-sm uppercase tracking-widest mb-6 underline decoration-blue-500 decoration-2 underline-offset-8">
                 Modules
               </h4>
               <ul className="space-y-3 text-xs font-medium">
                 {["Payroll", "Leave", "Performance", "Expense", "HR Letters", "Help Desk"].map(
-                  (m) => (
+                  (m, i) => (
                     <li
                       key={m}
-                      className="hover:text-blue-400 transition-colors cursor-pointer flex items-center gap-1"
+                      data-aos="fade-left"
+                      data-aos-delay={i * 50}
+                      className="hover:text-blue-400 transition-colors cursor-pointer flex items-center gap-1 group"
                     >
-                      <ChevronRight size={10} /> {m} Management
+                      <ChevronRight size={10} className="group-hover:translate-x-1 transition-transform" /> 
+                      {m} Management
                     </li>
                   )
                 )}
               </ul>
             </div>
 
-            <div className="lg:col-span-2">
+            <div 
+              data-aos="fade-up"
+              data-aos-delay="200"
+              className="lg:col-span-2"
+            >
               <h4 className="font-bold text-white text-sm uppercase tracking-widest mb-6 underline decoration-blue-500 decoration-2 underline-offset-8">
                 Navigate
               </h4>
               <ul className="space-y-3 text-xs font-medium">
-                {["About", "Clients", "Blogs", "Contact", "Resellers", "Privacy"].map((n) => (
-                  <li key={n} className="hover:text-blue-400 transition-colors cursor-pointer">
+                {["About", "Clients", "Blogs", "Contact", "Resellers", "Privacy"].map((n, i) => (
+                  <li 
+                    key={n} 
+                    data-aos="fade-left"
+                    data-aos-delay={i * 50 + 150}
+                    className="hover:text-blue-400 transition-colors cursor-pointer hover:translate-x-1 transform"
+                  >
                     {n}
                   </li>
                 ))}
               </ul>
             </div>
 
-            <div className="lg:col-span-4">
+            <div 
+              data-aos="fade-left"
+              data-aos-delay="300"
+              className="lg:col-span-4"
+            >
               <h4 className="font-bold text-white text-sm uppercase tracking-widest mb-6 underline decoration-blue-500 decoration-2 underline-offset-8">
                 Quick Connect
               </h4>
               <div className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <PhoneIcon className="w-5 h-5 text-blue-500 mt-0.5" />
+                <div 
+                  data-aos="fade-left"
+                  data-aos-delay="350"
+                  className="flex items-start gap-3 group hover:bg-slate-900/50 p-3 rounded-xl transition-all"
+                >
+                  <PhoneIcon className="w-5 h-5 text-blue-500 mt-0.5 group-hover:scale-110 transition-transform" />
                   <div>
                     <p className="text-white text-xs font-bold">+92 347 0213620</p>
                     <p className="text-[10px]">Sales & Inquiry</p>
                   </div>
                 </div>
-                <div className="flex items-start gap-3">
-                  <EnvelopeIcon className="w-5 h-5 text-blue-500 mt-0.5" />
+                <div 
+                  data-aos="fade-left"
+                  data-aos-delay="400"
+                  className="flex items-start gap-3 group hover:bg-slate-900/50 p-3 rounded-xl transition-all"
+                >
+                  <EnvelopeIcon className="w-5 h-5 text-blue-500 mt-0.5 group-hover:scale-110 transition-transform" />
                   <div>
                     <p className="text-white text-xs font-bold">sales@flowhcm.com</p>
                     <p className="text-[10px]">Support 24/7</p>
@@ -366,10 +498,12 @@ export default function ClientsPage() {
               { city: "Karachi, PK", addr: "Office 401, Business Arcade, Faisal" },
               { city: "Riyadh, SA", addr: "Building 7783, Ibn Katheer St" },
               { city: "Dar es Salaam, TZ", addr: "Millennium Towers Phase II" },
-            ].map((loc) => (
+            ].map((loc, i) => (
               <div
                 key={loc.city}
-                className="bg-slate-900/50 p-4 rounded-xl border border-slate-900 hover:border-slate-800 transition-all"
+                data-aos="fade-up"
+                data-aos-delay={i * 100}
+                className="bg-slate-900/50 p-4 rounded-xl border border-slate-900 hover:border-slate-800 transition-all hover:translate-y-[-2px] hover:shadow-xl"
               >
                 <p className="text-white font-bold mb-1">{loc.city}</p>
                 <p className="text-slate-500 uppercase leading-tight">{loc.addr}</p>
@@ -389,13 +523,13 @@ export default function ClientsPage() {
             transform: translateX(0);
           }
           100% {
-            transform: translateX(-50%);
+            transform: translateX(-33.33%);
           }
         }
         .animate-marquee {
           display: flex;
           width: fit-content;
-          animation: marquee 60s linear infinite;
+          animation: marquee 80s linear infinite;
         }
         .animate-marquee:hover {
           animation-play-state: paused;

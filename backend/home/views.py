@@ -76,3 +76,13 @@ class HomePageView(View):
             'clients': clients,
         }
         return JsonResponse(data)
+
+
+def dashboard_callback(request, context):
+    """
+    Unfold dashboard callback.
+    This function can add extra context to the admin dashboard.
+    """
+    # Add any custom data you want for the admin dashboard
+    context['custom_message'] = "Welcome to the Admin Dashboard 🚀"
+    return context

@@ -12,6 +12,10 @@ class Module(models.Model):
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    icon_name = models.CharField(
+        max_length=50,
+        help_text="Name of the Heroicon (e.g., 'UserGroupIcon')"
+    )
 
     def save(self, *args, **kwargs):
         if not self.slug:

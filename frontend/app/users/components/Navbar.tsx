@@ -54,14 +54,15 @@ export default function Navbar() {
                 </svg>
               </button>
 
-              {/* Dropdown */}
-              <div className="absolute left-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                <div className="py-2">
+              {/* Dropdown - Changed w-56 to w-[600px] or max-w-4xl for 3 columns */}
+              <div className="absolute left-0 mt-2 w-[600px] bg-white rounded-lg shadow-lg border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                {/* Added grid grid-cols-3 here */}
+                <div className="p-4 grid grid-cols-3 gap-2">
                   {modules.map((item) => (
                     <Link
                       key={item.slug}
                       href={`/users/module/${item.slug}`}
-                      className="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-md transition-colors"
                     >
                       {item.name}
                     </Link>

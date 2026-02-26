@@ -38,6 +38,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'unfold',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -51,7 +52,32 @@ INSTALLED_APPS = [
     'home',
     'hardware',
 ]
-
+# settings.py
+UNFOLD = {
+    "SITE_TITLE": "My Awesome Shop",
+    "SITE_HEADER": "Admin Dashboard",
+    "DARK_MODE": True, # Everyone loves dark mode, bro!
+    "SIDEBAR": {
+        "show_search": True, # Adds a search bar for your menu items
+        "show_all_applications": True,
+    },
+"DASHBOARD_CALLBACK": "home.views.dashboard_callback",
+"COLORS": {
+        "primary": {
+            # LIGHT MODE: Crisp "Corporate Blue" (Used when site is in light mode)
+            "50": "239 246 255",  # Blue 50
+            "100": "219 234 254",
+            "500": "37 99 235",   # Standard Professional Blue
+            "600": "29 78 216",   # Hover Blue
+            "950": "30 58 138",   # Deep Contrast Blue
+            
+            # DARK MODE: "Industrial Orange" (Unfold applies these in dark mode)
+            # To make this work perfectly, Unfold's dark mode mapping 
+            # usually pulls from the 400-500 range for accents.
+            "400": "251 146 60",  # Vivid Orange (Accents in dark mode)
+        },
+    },
+}
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # Next.js default port
 ]

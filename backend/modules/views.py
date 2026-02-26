@@ -7,7 +7,6 @@ from .models import Module
 class ModuleListView(View):
     def get(self, request):
         modules = Module.objects.filter(is_active=True).order_by('order', 'name')
-        # serialize queryset to JSON
         data = []
         for module in modules:
             data.append({
@@ -18,6 +17,7 @@ class ModuleListView(View):
                 'hero_description': module.hero_description,
                 'content': module.content,
                 'featured_image': module.featured_image.url if module.featured_image else None,
+                'icon_name': module.icon_name,         
                 'order': module.order,
             })
         return JsonResponse(data, safe=False)

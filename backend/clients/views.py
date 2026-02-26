@@ -23,3 +23,30 @@ class ClientListView(View):
                 'category_id': client.category.id if client.category else None,
             })
         return JsonResponse(data, safe=False)
+
+
+        # myapp/views.py
+
+def dashboard_callback(request, context):
+    context.update({
+        "navigation": [
+            {
+                "title": "Quick Stats",
+                "items": [
+                    {
+                        "title": "Total Clients",
+                        "link": "/admin/myapp/client/",
+                        "description": f"{Client.objects.count()} Registered",
+                        "icon": "group", # Uses Google Material Icons
+                    },
+                    {
+                        "title": "Active Categories",
+                        "link": "/admin/myapp/category/",
+                        "description": f"{Category.objects.filter(is_active=True).count()} Active",
+                        "icon": "category",
+                    },
+                ],
+            },
+        ],
+    })
+    return context
