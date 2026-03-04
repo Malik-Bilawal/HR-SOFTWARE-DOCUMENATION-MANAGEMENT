@@ -34,50 +34,44 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
-# Application definition
-
 INSTALLED_APPS = [
+    # Unfold must be BEFORE django.contrib.admin
     'unfold',
+    'unfold.contrib.filters',  # Optional, but recommended for advanced filters
+    'unfold.contrib.forms',     # Optional, but recommended for form styling
+    'unfold.contrib.inlines',   # Optional, but recommended for inlines
+    'unfold.contrib.import_export',  # Optional, for import-export integration
+    'unfold.contrib.guardian',  # Optional, if you use django-guardian
+    'unfold.contrib.simple_history',  # Optional, if you use django-simple-history
+    
+    # Django built-in
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    
+    # Third party apps
+    'rest_framework',
     'corsheaders',
-    'modules',
+    'import_export',
+    'rangefilter',
+    
+    # Local apps
+    'core',
     'clients',
-    'contact',
-    'home',
-    'hardware',
+    'projects',
+    'payments',
 ]
-# settings.py
+
 UNFOLD = {
-    "SITE_TITLE": "My Awesome Shop",
-    "SITE_HEADER": "Admin Dashboard",
-    "DARK_MODE": True, # Everyone loves dark mode, bro!
-    "SIDEBAR": {
-        "show_search": True, # Adds a search bar for your menu items
-        "show_all_applications": True,
-    },
-"DASHBOARD_CALLBACK": "home.views.dashboard_callback",
-"COLORS": {
-        "primary": {
-            # LIGHT MODE: Crisp "Corporate Blue" (Used when site is in light mode)
-            "50": "239 246 255",  # Blue 50
-            "100": "219 234 254",
-            "500": "37 99 235",   # Standard Professional Blue
-            "600": "29 78 216",   # Hover Blue
-            "950": "30 58 138",   # Deep Contrast Blue
-            
-            # DARK MODE: "Industrial Orange" (Unfold applies these in dark mode)
-            # To make this work perfectly, Unfold's dark mode mapping 
-            # usually pulls from the 400-500 range for accents.
-            "400": "251 146 60",  # Vivid Orange (Accents in dark mode)
-        },
-    },
+    "SITE_TITLE": "SRF Integrated Management System",
+    "SITE_HEADER": "SRF IMS",
+    "SITE_URL": "/",
 }
+# Required for unfold
+X_FRAME_OPTIONS = "SAMEORIGIN"
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # Next.js default port
 ]
